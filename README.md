@@ -109,11 +109,36 @@ uv pip install -r requirements.txt
 # atau: pip install -r requirements.txt
 ```
 
-#### 2. Konfigurasi Kunci API LLM:
+#### 2. Konfigurasi Kunci API LLM (Wajib untuk Modul AI):
+Modul `agentic_cti` membutuhkan **API LLM** sebagai mesin penalaran agen. Anda dapat memilih antara **Cloud API** atau **Local / Custom Endpoint (100% Offline)**:
+
 ```powershell
 Copy-Item .env.example .env
 ```
-Edit file `.env` dan masukkan API key pilihan Anda (misal `OPENAI_API_KEY` atau `GEMINI_API_KEY`).
+Buka file `.env` dan pilih salah satu opsi API LLM:
+
+* **Opsi A: Cloud LLM API (OpenAI / Gemini / Anthropic):**
+  ```env
+  OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxx
+  OPENAI_MODEL_NAME=gpt-4o-mini
+  # Atau Gemini:
+  # GEMINI_API_KEY=AIzaxxxxxxxxxxxxxxxxxxxx
+  # LLM_MODEL=gemini/gemini-1.5-flash
+  ```
+
+* **Opsi B: Local LLM API (100% Gratis, Offline, Private via Ollama):**
+  ```env
+  LLM_BASE_URL=http://localhost:11434/v1
+  LLM_MODEL=ollama/llama3.1
+  LLM_API_KEY=NA
+  ```
+
+* **Opsi C: Custom Enterprise / Corporate SOC Gateway (vLLM / LM Studio / Proxy):**
+  ```env
+  LLM_BASE_URL=https://llm-gateway.company.internal/v1
+  LLM_MODEL=custom-soc-model
+  LLM_API_KEY=your_token
+  ```
 
 #### 3. Eksekusi Investigasi Agen AI:
 ```powershell

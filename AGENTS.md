@@ -53,7 +53,7 @@ Urutan eksekusi dependensi:
 ## 5. Menjalankan Modul AI-Powered CTI (`agentic_cti`)
 - Direktori: `agentic_cti/`
 - Dependensi: `uv pip install -r requirements.txt` atau `pip install -r requirements.txt`
-- Konfigurasi: Salin `.env.example` ke `.env` dan masukkan `OPENAI_API_KEY` atau `GEMINI_API_KEY`.
+- Konfigurasi: Salin `.env.example` ke `.env` dan tentukan API LLM (Cloud API: `OPENAI_API_KEY` / `GEMINI_API_KEY`, atau Local / Custom Endpoint: `LLM_BASE_URL=http://localhost:11434/v1` untuk Ollama).
 - Eksekusi Triage: `python main.py run --ip <TARGET_IP>` atau `python main.py demo`.
 - Output: Laporan eksekutif di `agentic_cti/reports/latest_cti_incident_report.md`, `firewall_blocklist.txt`, dan `stix_incident_bundle.json`.
 
