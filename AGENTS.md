@@ -39,13 +39,13 @@ Jika Anda (AI Agent) diminta memodifikasi kode pada salah satu dari 5 sensor Go:
 ---
 
 ## 4. Startup Sequence & Port Matrix
-Urutan eksekusi dependensi:
-```
-1. cachedb    (:50051)  <-- WAJIB PERTAMA
-2. synwatcher (L4 Sniff)
-3. scp        (:60606)
-4. lemes      (:50505)
-5. ClassRoot  (:8443)
+Eksekusi portabel (setelah menjalankan `.\install-all.ps1`):
+```powershell
+1. cachedb -port 50051 -ttl 36000           (:50051 gRPC)   <-- WAJIB PERTAMA
+2. synwatcher -logfile synwatcher_cti.jsonl (L4 Sniff Npcap)
+3. scp                                      (:60606 SFTP)
+4. lemes -port :50505 -ctilog lemes_cti.jsonl (:50505 HTTP)
+5. classroot                                (:8443 WebRTC)
 ```
 
 ---

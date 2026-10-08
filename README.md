@@ -115,31 +115,40 @@ flowchart TD
 
 ## 🚀 Panduan Tata Cara Menjalankan Aplikasi & Modul `actif`
 
-### A. Tata Cara Menjalankan Ekosistem Deception (5 Sensor Go)
+### A. Instalasi & Eksekusi Portabel 5 Sensor Deception (Disarankan)
 
-Jalankan kelima daemon sesuai urutan dependensi berikut di terminal terpisah:
+Agar portabel dan dapat **dipanggil langsung dari terminal / PowerShell mana pun tanpa perlu `cd` atau `go run`**, pasang kelima binary daemon ke PATH sistem Anda:
+
+```powershell
+# Pasang kelima daemon sekaligus ke PATH sistem (menggunakan script installer masing-masing):
+.\install-all.ps1
+
+# Atau jika ingin mengompilasi langsung dari source code Go lokal:
+# .\install-all.ps1 -FromSource
+```
+
+Setelah terpasang, buka 5 terminal dan panggil perintahnya secara langsung sesuai urutan dependensi:
 
 ```powershell
 # 1. Terminal 1 - Jalankan In-Memory Threat State Bus (WAJIB PERTAMA):
-cd .\cachedb
-go run main.go -port 50051 -ttl 36000
+cachedb -port 50051 -ttl 36000
 
-# 2. Terminal 2 - Jalankan Sensor Pengintaian L4:
-cd .\synwatcher
-go run . -cti synwatcher_cti.jsonl
+# 2. Terminal 2 - Jalankan Sensor Pengintaian L4 (Npcap):
+synwatcher -logfile synwatcher_cti.jsonl
 
 # 3. Terminal 3 - Jalankan Dynamic SFTP Honeypot & Forensik:
-cd .\scp
-go run .
+scp
 
 # 4. Terminal 4 - Jalankan Honeybeacon & Alerting Webhook:
-cd .\lemes
-go run . -port :50505 -ctilog lemes_cti.jsonl
+lemes -port :50505 -ctilog lemes_cti.jsonl
 
 # 5. Terminal 5 - Jalankan WebRTC Decoy & LAN Unmasker:
-cd .\ClassRoot
-go run .
+classroot
 ```
+
+> **💡 Opsi Alternatif Pengembang (Dev Mode tanpa install):**  
+> Jika sedang mengedit kode sumber dan ingin menjalankan langsung tanpa memasang binary:  
+> `cd .\cachedb && go run main.go -port 50051` | `cd .\synwatcher && go run . -cti synwatcher_cti.jsonl` | `cd .\scp && go run .` | `cd .\lemes && go run . -port :50505` | `cd .\ClassRoot && go run .`
 
 ---
 
