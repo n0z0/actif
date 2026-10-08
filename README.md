@@ -182,5 +182,25 @@ Get-Content -Wait -Tail 20 .\lemes\lemes_cti.jsonl, .\ClassRoot\classroot_cti.js
 
 ---
 
+## 📌 Status Proyek & Catatan Pengembang (Context for Future AI Sessions)
+
+Bagian ini dirancang agar setiap **AI Agent / Pair Programmer** di masa mendatang yang membuka repositori ini langsung memiliki konteks penuh tanpa kehilangan riwayat:
+
+1. **Status Komponen Sensor:**
+   - Seluruh 5 aplikasi Go (`cachedb`, `synwatcher`, `scp`, `ClassRoot`, `lemes`) sudah selesai di-hardening, lulus tes integrasi (`go test ./...`), dan di-push ke GitHub repo masing-masing.
+   - Kelima folder sub-repo tersebut **di-ignore** di `.gitignore` agar root repositori `actif` tetap bersih.
+2. **Status Modul AI Orchestrator:**
+   - Modul `agentic_cti/` (CrewAI) sudah siap digunakan lengkap dengan 5 definisi agen (`agents.yaml`), 5 alur tugas (`tasks.yaml`), serta custom tools integrasi ke binary CacheDB dan log JSONL.
+3. **Instruksi Khusus untuk AI Agent:**
+   - Panduan arsitektur dan batasan proyek tersimpan di: **[`AGENTS.md`](./AGENTS.md)**.
+   - Skill operasional workspace Antigravity tersimpan di: **[`.agents/skills/actif_orchestrator/SKILL.md`](./.agents/skills/actif_orchestrator/SKILL.md)**.
+   - Runbook operasional lengkap & SOP 1–6 tersimpan di: **[`CTI_BRIEF.md`](./CTI_BRIEF.md)**.
+4. **Roadmap Selanjutnya:**
+   - [ ] Pengujian investigasi langsung (*Live Run*) CrewAI menggunakan LLM API Key nyata (OpenAI / Gemini).
+   - [ ] Pembuatan skrip orkestrator otomasi startup/shutdown terpadu (`start-ecosystem.ps1` / `stop-ecosystem.ps1`).
+
+---
+
 ## 📄 Lisensi
 Apache License 2.0 / Internal Security Operations.
+
