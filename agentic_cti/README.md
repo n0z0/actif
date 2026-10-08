@@ -66,6 +66,19 @@ python main.py run --ip 198.51.100.25
 python main.py demo
 ```
 
+### 3. Menjalankan Web Dashboard Command Center (Visual UI):
+Buka terminal dan jalankan server dashboard:
+```powershell
+python dashboard.py
+```
+Akses di browser: **`http://localhost:8088`**
+Fitur visual:
+- Status real-time 5 sensor dan CacheDB
+- Animasi status 5 agen AI (*PENDING* $\to$ *ANALYZING* $\to$ *COMPLETED*)
+- Live terminal execution stream
+- Interaktif target picker dari CacheDB
+- Preview Laporan Eksekutif CTI dan unduh instan STIX / Blocklist
+
 ---
 
 ## 📄 Artefak Hasil Investigasi (Outputs)

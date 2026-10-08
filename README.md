@@ -64,6 +64,53 @@ Repositori ini dilengkapi modul **[`agentic_cti/`](./agentic_cti)**, yaitu siste
 4. **`threat_intel_strategist`**: Memetakan kill chain ke taktik/teknik MITRE ATT&CK dan menghitung Composite Threat Score.
 5. **`soc_incident_commander`**: Menyusun Executive Incident Brief, merilis STIX 2.1 bundle, dan menetapkan blocklist firewall.
 
+```mermaid
+flowchart TD
+    subgraph SENSORS ["📡 Sensor Layer (n0z0 Deception)"]
+        S1["synwatcher (L4 SYN Sniffer)"]
+        S2["scp (L7 SFTP Honeypot)"]
+        S3["ClassRoot (L7 WebRTC Decoy)"]
+        S4["lemes (L7 Honeybeacon & Lures)"]
+        BUS[("cachedb (:50051 gRPC)")]
+        S1 --> BUS
+        S2 --> BUS
+        S3 --> BUS
+        S4 --> BUS
+    end
+
+    subgraph CREWAI ["🧠 CrewAI Multi-Agent Pipeline"]
+        direction TB
+        A1["🕵️ 1. L4 Recon Specialist<br><i>Analisa pola scan, velocity, OS passive</i>"]
+        A2["🔬 2. DFIR File Specialist<br><i>Analisa author docx, GPS EXIF, PDB</i>"]
+        A3["🎭 3. Attribution Hunter<br><i>Bongkar VPN via WebRTC LAN IP leak</i>"]
+        A4["🗺️ 4. Threat Intel Strategist<br><i>Petakan MITRE ATT&CK & Threat Score</i>"]
+        A5["🚨 5. SOC Incident Commander<br><i>Keputusan akhir & Action Plan</i>"]
+
+        A1 -->|Handoff Profil L4| A2
+        A2 -->|Handoff Artefak Berkas| A3
+        A3 -->|Handoff Bukti Atribusi| A4
+        A4 -->|Handoff Dossier MITRE| A5
+    end
+
+    SENSORS ==>|Log JSONL & CacheDB Query| CREWAI
+
+    subgraph OUTPUTS ["📑 Actionable CTI Deliverables"]
+        O1["📄 Executive Incident Report (.md)"]
+        O2["🌐 STIX 2.1 Threat Bundle (.json)"]
+        O3["🛡️ Perimeter Firewall Blocklist (.txt)"]
+        A5 --> O1
+        A5 --> O2
+        A5 --> O3
+    end
+
+    classDef sensor fill:#1f2937,stroke:#3b82f6,stroke-width:2px,color:#fff;
+    classDef agent fill:#111827,stroke:#10b981,stroke-width:2px,color:#fff;
+    classDef output fill:#1e1b4b,stroke:#8b5cf6,stroke-width:2px,color:#fff;
+    class S1,S2,S3,S4,BUS sensor;
+    class A1,A2,A3,A4,A5 agent;
+    class O1,O2,O3 output;
+```
+
 ---
 
 ## 🚀 Panduan Tata Cara Menjalankan Aplikasi & Modul `actif`
@@ -140,7 +187,7 @@ Buka file `.env` dan pilih salah satu opsi API LLM:
   LLM_API_KEY=your_token
   ```
 
-#### 3. Eksekusi Investigasi Agen AI:
+#### 3. Eksekusi Investigasi Agen AI via Terminal (CLI):
 ```powershell
 # Jalankan investigasi multi-agent mendalam terhadap IP penyerang tertentu:
 python main.py run --ip 198.51.100.25
@@ -148,6 +195,19 @@ python main.py run --ip 198.51.100.25
 # Atau jalankan simulasi demonstrasi skenario penyerangan:
 python main.py demo
 ```
+
+#### 4. Menjalankan Interactive Web Dashboard Command Center (Visual UI):
+Bagi tim analis SOC yang menginginkan antarmuka visual grafis dengan animasi interaktif di browser:
+```powershell
+python dashboard.py
+```
+Buka browser pada **`http://localhost:8088`** untuk memantau:
+- 🎛️ **Status 5 Sensor Deception & CacheDB** secara live.
+- 👥 **Kartu 5 Agen AI** dengan indikator animasi (*PENDING* $\to$ *ANALYZING...* $\to$ *COMPLETED*).
+- 💻 **Live Terminal Stream** proses penalaran (*thought process*) dan panggilan alat secara real-time.
+- 🎯 **Daftar Threat Actors aktif** dari CacheDB yang dapat dipilih langsung.
+- 📊 **Gauge Skor Risiko Komposit (0–100)**, tag MITRE ATT&CK, dan preview Laporan Eksekutif CTI.
+- 💾 **Tombol unduh instan** untuk berkas laporan CTI, STIX 2.1 bundle, dan Firewall Blocklist.
 
 *Output yang otomatis dihasilkan:*
 - 📄 **Executive Brief:** `agentic_cti/reports/latest_cti_incident_report.md`
