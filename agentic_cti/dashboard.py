@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import time
+import shutil
 import threading
 import subprocess
 from http.server import HTTPServer, SimpleHTTPRequestHandler
@@ -113,8 +114,10 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         # Cek ping ke CacheDB jika ada
         cachedb_ping = False
         try:
-            cachedb_dir = root_dir / "cachedb"
-            res = subprocess.run(["go", "run", "main.go", "-ping"], cwd=cachedb_dir, capture_output=True, text=True, timeout=3)
+            cachedb_bin = shutil.which("cachedb")
+            cmd = [cachedb_bin, "-ping"] if cachedb_bin else ["go", "run", "main.go", "-ping"]
+            cwd = None if cachedb_bin else root_dir / "cachedb"
+            res = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=3)
             if "PONG" in res.stdout:
                 cachedb_ping = True
         except Exception:
@@ -139,8 +142,10 @@ class DashboardHandler(SimpleHTTPRequestHandler):
         actors = []
         root_dir = Path("..")
         try:
-            cachedb_dir = root_dir / "cachedb"
-            res = subprocess.run(["go", "run", "main.go", "-actors"], cwd=cachedb_dir, capture_output=True, text=True, timeout=4)
+            cachedb_bin = shutil.which("cachedb")
+            cmd = [cachedb_bin, "-actors"] if cachedb_bin else ["go", "run", "main.go", "-actors"]
+            cwd = None if cachedb_bin else root_dir / "cachedb"
+            res = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=4)
             for line in res.stdout.splitlines():
                 if "19" in line or "10." in line or "172." in line or "185." in line:
                     actors.append(line.strip())

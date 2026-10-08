@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import json
 from typing import Type, Optional
@@ -19,16 +20,23 @@ class CacheDBInspectorTool(BaseTool):
     args_schema: Type[BaseModel] = CacheDBInput
 
     def _run(self, action: str, ip: Optional[str] = None) -> str:
-        # Tentukan path ke folder cachedb
+        # 1. Prioritaskan binary 'cachedb' yang terpasang di PATH sistem (hasil install-all.ps1)
+        global_cachedb = shutil.which("cachedb")
         cachedb_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "cachedb"))
         cachedb_exe = os.path.join(cachedb_dir, "cachedb.exe")
 
         cmd = []
-        if os.path.isfile(cachedb_exe):
+        exec_cwd = None
+
+        if global_cachedb:
+            cmd = [global_cachedb]
+        elif os.path.isfile(cachedb_exe):
             cmd = [cachedb_exe]
+            exec_cwd = cachedb_dir
         else:
             # Fallback ke go run jika binary belum di-compile
             cmd = ["go", "run", "main.go"]
+            exec_cwd = cachedb_dir
 
         if action == "ping":
             cmd.append("-ping")
@@ -46,7 +54,7 @@ class CacheDBInspectorTool(BaseTool):
         try:
             res = subprocess.run(
                 cmd,
-                cwd=cachedb_dir,
+                cwd=exec_cwd,
                 capture_output=True,
                 text=True,
                 timeout=10,
