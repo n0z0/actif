@@ -1,0 +1,65 @@
+triage_recon_task:
+  description: >
+    Periksa data reconnaissance L4 dari sensor synwatcher dan CacheDB untuk target IP: '{target_ip}'.
+    Evaluasi:
+    1. Scan Velocity dan pola waktu probe (apakah BURST, STEADY, atau SLOW_AND_LOW stealth).
+    2. Fingerprint TCP SYN (MD5 hash) dan tool scanning yang diidentifikasi (Nmap, Masscan, Zmap, Custom).
+    3. Perkiraan Sistem Operasi (Passive OS estimation) dari Window Size dan TTL.
+    4. Reverse DNS (PTR Hostname) untuk mendeteksi apakah IP tersebut merupakan VPS hosting, Tor node, atau residensial.
+    Gunakan tool 'log_reader' atau 'cachedb_inspector'.
+  expected_output: >
+    Laporan profil pengintaian L4 terstruktur mencakup: Tool yang digunakan, Scan Velocity,
+    Perkiraan OS, Reverse DNS, Port yang diincar, dan penilaian apakah scan bersifat otomatis atau terarah.
+  agent: l4_recon_specialist
+
+forensic_file_task:
+  description: >
+    Periksa riwayat interaksi file di sensor SFTP scp untuk target IP: '{target_ip}'.
+    Evaluasi:
+    1. File yang diunggah oleh penyerang: Ekstrak SHA-256, MIME type, nama author dokumen (Office OpenXML),
+       aplikasi pembuat dokumen, koordinat GPS (jika gambar ber-EXIF), dan jalur PDB (jika executable).
+    2. File jebakan (lure) yang diunduh: Catat nama file dan token canary yang diambil.
+    Gunakan tool 'log_reader' atau 'cachedb_inspector'.
+  expected_output: >
+    Laporan analisis forensik berkas mencakup: Hash SHA-256, artefak OPSEC (nama akun Windows author,
+    software build, timezone, GPS lokasi jika ada), dan daftar dokumen umpan yang berhasil dicuri penyerang.
+  agent: dfir_file_specialist
+
+de_anonymize_hunter_task:
+  description: >
+    Korelasikan data dari sensor ClassRoot (WebRTC) dan lemes (Honeybeacon) untuk target IP: '{target_ip}'.
+    Evaluasi:
+    1. Apakah terdapat kebocoran WebRTC ICE Candidate lokal ('typ host') yang mengekspos IP LAN fisik di balik VPN?
+    2. Apa spesifikasi perangkat keras penyerang (WebGL GPU Renderer, Canvas hash, resolusi layar, kamera/mic)?
+    3. Apakah token umpan dibuka dari IP yang berbeda dari IP yang mengunduh file (Atribusi De-anonymization)?
+    Gunakan tool 'log_reader' atau 'cachedb_inspector'.
+  expected_output: >
+    Bukti atribusi de-anonymization lengkap: Perbandingan IP Publik (VPN) vs IP LAN Fisik asli penyerang,
+    spesifikasi kartu grafis GPU asli, bukti token mismatch (de-anonymized: true/false), dan tingkat kepastian atribusi.
+  agent: attribution_hunter
+
+threat_modeling_task:
+  description: >
+    Sintesiskan seluruh temuan dari Recon L4, Forensik Berkas, dan Atribusi De-anonymization untuk target IP: '{target_ip}'.
+    Tugas:
+    1. Petakan setiap tahapan serangan ke taktik dan nomor teknik MITRE ATT&CK Enterprise Framework
+       (misal T1595, T1046, T1110, T1078, T1105, T1083, T1005, T1204, T1016, T1125).
+    2. Hitung Composite Threat Score (0 - 100) dan klasifikasikan Severity (LOW / MEDIUM / HIGH / CRITICAL).
+    3. Analisis motivasi penyerang (Reconnaissance, Credential Theft, Data Exfiltration, atau Espionage).
+  expected_output: >
+    Matriks korelasi MITRE ATT&CK, skor ancaman komposit akhir (0-100), tingkat severity,
+    dan profil modus operandi penyerang.
+  agent: threat_intel_strategist
+
+incident_response_action_task:
+  description: >
+    Berdasarkan hasil analisis dari seluruh tim spesialis untuk target IP: '{target_ip}', susun respons insiden final:
+    1. Tulis 'Executive Threat Intelligence Incident Brief' resmi yang komprehensif, terstruktur, dan siap
+       diserahkan kepada pimpinan SOC / CISO (dalam Bahasa Indonesia profesional).
+    2. Ekstrak daftar utuh Indicators of Compromise (IoCs) terverifikasi (IPs, Hash, Domains, Usernames).
+    3. Tentukan apakah IP harus segera di-blokir di perimeter firewall, dan gunakan tool 'firewall_enforcer' jika skor risiko >= 70.
+    4. Buat ringkasan format STIX 2.1 Threat Report.
+  expected_output: >
+    Dokumen Laporan Eksekutif Insiden CTI, tabel IoC lengkap, konfirmasi eksekusi blocklist firewall,
+    dan bundle STIX 2.1 JSON.
+  agent: soc_incident_commander

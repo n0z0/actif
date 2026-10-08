@@ -54,6 +54,20 @@ Setiap komponen aplikasi dikelola secara modular pada repositorinya masing-masin
 
 ---
 
+## 🤖 AI-Powered CTI Orchestrator (CrewAI Multi-Agent System)
+
+Repositori ini dilengkapi modul **[`agentic_cti/`](./agentic_cti)**, yaitu sistem multi-agent otonom berbasis **CrewAI** yang bertindak sebagai analis SOC virtual untuk mengolah dan mengkorelasikan seluruh data sensor secara otomatis:
+
+1. **`l4_recon_specialist`**: Menganalisis log `synwatcher` (pola scan, SYN fingerprint MD5, OS passive, scan velocity).
+2. **`dfir_file_specialist`**: Menganalisis log `scp` (forensik metadata author docx/pdf, EXIF GPS, SHA-256, build compiler).
+3. **`attribution_hunter`**: Mengkorelasikan log `ClassRoot` & `lemes` (unmasking VPN via WebRTC LAN IP leak & token mismatch).
+4. **`threat_intel_strategist`**: Memetakan kill chain ke taktik/teknik MITRE ATT&CK dan menghitung Composite Threat Score.
+5. **`soc_incident_commander`**: Menyusun Executive Incident Brief, merilis STIX 2.1 bundle, dan menetapkan blocklist firewall.
+
+> Panduan instalasi dan eksekusi AI Agent: **[agentic_cti/README.md](./agentic_cti/README.md)**
+
+---
+
 ## 📖 Dokumentasi Lengkap & Standard Operating Procedures (SOP)
 
 Seluruh spesifikasi arsitektur, skenario penyerangan, pemetaan MITRE ATT&CK, distribusi log, SOP harian SOC, hingga manifest Filebeat & Vector didokumentasikan secara rinci di:

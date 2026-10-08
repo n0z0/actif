@@ -230,3 +230,12 @@ synwatcher/
 *.jsonl
 *.db
 firewall_blocklist.txt
+
+# Python virtual environments & agentic CTI outputs
+.venv/
+__pycache__/
+*.pyc
+.env
+agentic_cti/reports/
+stix_incident_bundle.json
+
