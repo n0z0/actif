@@ -218,3 +218,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Sub-application repositories (individually managed)
+cachedb/
+ClassRoot/
+lemes/
+scp/
+synwatcher/
+
+# Ecosystem log, database, and telemetry outputs
+*.jsonl
+*.db
+firewall_blocklist.txt
