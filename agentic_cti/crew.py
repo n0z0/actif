@@ -1,8 +1,8 @@
 import os
 import yaml
 from pathlib import Path
-from typing import Dict, Any
-from crewai import Agent, Crew, Process, Task
+from typing import Dict, Any, Optional
+from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 
 from tools.cachedb_tool import CacheDBInspectorTool
@@ -23,11 +23,34 @@ class ActifCTICrew:
         self.firewall_tool = FirewallEnforcerTool()
         self.stix_tool = STIXExporterTool()
 
+        # Konfigurasi LLM fleksibel (mendukung Custom Endpoint, Local Ollama, vLLM, LM Studio, Azure, Cloud)
+        self.llm = self._resolve_llm()
+
+    def _resolve_llm(self) -> Optional[LLM]:
+        base_url = os.getenv("LLM_BASE_URL") or os.getenv("OPENAI_API_BASE")
+        model = os.getenv("LLM_MODEL") or os.getenv("OPENAI_MODEL_NAME") or "gpt-4o-mini"
+        api_key = os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or "NA"
+
+        # 1. Jika pengguna mendefinisikan Custom Endpoint (Ollama, vLLM, On-Prem Proxy, LM Studio)
+        if base_url:
+            return LLM(
+                model=model,
+                base_url=base_url,
+                api_key=api_key,
+            )
+        # 2. Jika menggunakan Cloud API standar (OpenAI, Gemini, Anthropic)
+        elif os.getenv("OPENAI_API_KEY") or os.getenv("GEMINI_API_KEY") or os.getenv("ANTHROPIC_API_KEY"):
+            return LLM(model=model)
+
+        # Default fallback ke model standard
+        return None
+
     @agent
     def l4_recon_specialist(self) -> Agent:
         return Agent(
             config=self.agents_config["l4_recon_specialist"],
             tools=[self.log_reader_tool, self.cachedb_tool],
+            llm=self.llm,
             verbose=True,
         )
 
@@ -36,6 +59,7 @@ class ActifCTICrew:
         return Agent(
             config=self.agents_config["dfir_file_specialist"],
             tools=[self.log_reader_tool, self.cachedb_tool],
+            llm=self.llm,
             verbose=True,
         )
 
@@ -44,6 +68,7 @@ class ActifCTICrew:
         return Agent(
             config=self.agents_config["attribution_hunter"],
             tools=[self.log_reader_tool, self.cachedb_tool],
+            llm=self.llm,
             verbose=True,
         )
 
@@ -52,6 +77,7 @@ class ActifCTICrew:
         return Agent(
             config=self.agents_config["threat_intel_strategist"],
             tools=[self.cachedb_tool, self.log_reader_tool],
+            llm=self.llm,
             verbose=True,
         )
 
@@ -60,6 +86,7 @@ class ActifCTICrew:
         return Agent(
             config=self.agents_config["soc_incident_commander"],
             tools=[self.firewall_tool, self.stix_tool, self.cachedb_tool],
+            llm=self.llm,
             verbose=True,
         )
 
