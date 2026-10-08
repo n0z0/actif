@@ -64,9 +64,71 @@ Repositori ini dilengkapi modul **[`agentic_cti/`](./agentic_cti)**, yaitu siste
 4. **`threat_intel_strategist`**: Memetakan kill chain ke taktik/teknik MITRE ATT&CK dan menghitung Composite Threat Score.
 5. **`soc_incident_commander`**: Menyusun Executive Incident Brief, merilis STIX 2.1 bundle, dan menetapkan blocklist firewall.
 
-> Panduan instalasi dan eksekusi AI Agent: **[agentic_cti/README.md](./agentic_cti/README.md)**
+---
+
+## 🚀 Panduan Tata Cara Menjalankan Aplikasi & Modul `actif`
+
+### A. Tata Cara Menjalankan Ekosistem Deception (5 Sensor Go)
+
+Jalankan kelima daemon sesuai urutan dependensi berikut di terminal terpisah:
+
+```powershell
+# 1. Terminal 1 - Jalankan In-Memory Threat State Bus (WAJIB PERTAMA):
+cd .\cachedb
+go run main.go -port 50051 -ttl 36000
+
+# 2. Terminal 2 - Jalankan Sensor Pengintaian L4:
+cd .\synwatcher
+go run . -cti synwatcher_cti.jsonl
+
+# 3. Terminal 3 - Jalankan Dynamic SFTP Honeypot & Forensik:
+cd .\scp
+go run .
+
+# 4. Terminal 4 - Jalankan Honeybeacon & Alerting Webhook:
+cd .\lemes
+go run . -port :50505 -ctilog lemes_cti.jsonl
+
+# 5. Terminal 5 - Jalankan WebRTC Decoy & LAN Unmasker:
+cd .\ClassRoot
+go run .
+```
 
 ---
+
+### B. Tata Cara Menjalankan AI-Powered CTI Orchestrator (CrewAI Python)
+
+Setelah sensor aktif atau menghasilkan log, jalankan agen AI untuk menganalisis dan mengkorelasikan temuan:
+
+#### 1. Setup & Instalasi Dependensi:
+```powershell
+cd .\agentic_cti
+
+# Instalasi paket via uv (direkomendasikan) atau pip:
+uv pip install -r requirements.txt
+# atau: pip install -r requirements.txt
+```
+
+#### 2. Konfigurasi Kunci API LLM:
+```powershell
+Copy-Item .env.example .env
+```
+Edit file `.env` dan masukkan API key pilihan Anda (misal `OPENAI_API_KEY` atau `GEMINI_API_KEY`).
+
+#### 3. Eksekusi Investigasi Agen AI:
+```powershell
+# Jalankan investigasi multi-agent mendalam terhadap IP penyerang tertentu:
+python main.py run --ip 198.51.100.25
+
+# Atau jalankan simulasi demonstrasi skenario penyerangan:
+python main.py demo
+```
+
+*Output yang otomatis dihasilkan:*
+- 📄 **Executive Brief:** `agentic_cti/reports/latest_cti_incident_report.md`
+- 🛡️ **Firewall Blocklist:** `firewall_blocklist.txt`
+- 🌐 **STIX 2.1 Bundle:** `stix_incident_bundle.json`
+
 
 ## 📖 Dokumentasi Lengkap & Standard Operating Procedures (SOP)
 
