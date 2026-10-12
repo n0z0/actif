@@ -14,7 +14,7 @@ triage_recon_task:
 
 forensic_file_task:
   description: >
-    Periksa riwayat interaksi file di sensor SFTP scp untuk target IP: '{target_ip}'.
+    Periksa riwayat interaksi file di sensor SFTP scpd untuk target IP: '{target_ip}'.
     Evaluasi:
     1. File yang diunggah oleh penyerang: Ekstrak SHA-256, MIME type, nama author dokumen (Office OpenXML),
        aplikasi pembuat dokumen, koordinat GPS (jika gambar ber-EXIF), dan jalur PDB (jika executable).

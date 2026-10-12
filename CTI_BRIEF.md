@@ -43,7 +43,132 @@ Ecosystem ini mengimplementasikan siklus **Cyber Threat Intelligence (CTI) & Dec
 
 ---
 
-## 2. Peran & Spesifikasi 5 Aplikasi
+## 2. Fondasi & Metodologi Cyber Threat Intelligence (CTI Fundamentals)
+
+Sebagai ekosistem pertahanan aktif dan intelijen ancaman kelas SOC (*SOC-Grade*), `actif` dibangun di atas pilar-pilar teoretis dan metodologi CTI internasional (**SANS FOR578, CREST CTI, MITRE ATT&CK, NIST SP 800-150**).
+
+### A. Hirarki DIKW dalam Ekosistem Actif
+Intelijen ancaman bukanlah sekadar pengumpulan data mentah, melainkan proses penyulingan melalui piramida DIKW (*Data, Information, Knowledge, Wisdom/Intelligence*):
+
+```
+       / \
+      /   \      INTELLIGENCE (Actionable & Contextual)
+     /     \     - CrewAI Multi-Agent correlation, pembongkaran identitas,
+    /       \      rekomendasi blokir perimeter, dan STIX 2.1 bundle.
+   /---------\
+  /           \   INFORMATION (Processed & Structured)
+ /             \  - JSON Lines terstruktur (synwatcher_cti, scpd_cti, lemes_cti),
+/---------------\   MD5 SYN hash, SHA-256 berkas, metadata OpenXML/EXIF GPS.
+/                 \
+/                   \ DATA (Raw Telemetry)
+/---------------------\ - Paket raw TCP SYN pcap, payload file SFTP, SDP ICE candidates.
+```
+
+---
+
+### B. Siklus Hidup Intelijen Ancaman (The Threat Intelligence Lifecycle)
+Seluruh komponen `actif` menjalankan siklus intelijen ancaman 6-tahap secara otonom:
+
+```mermaid
+flowchart TD
+    D1["1. Direction & Planning<br>(PIRs: Priority Intelligence Requirements)"] --> D2["2. Collection<br>(5 Sensor Deception Go: L4-L7)"]
+    D2 --> D3["3. Processing<br>(rDNS Caching, SHA-256, OpenXML/EXIF/PDB Parser)"]
+    D3 --> D4["4. Analysis & Production<br>(CrewAI Multi-Agent + CacheDB State Bus)"]
+    D4 --> D5["5. Dissemination<br>(Executive MD Brief, STIX 2.1 JSON, Firewall Blocklist)"]
+    D5 --> D6["6. Feedback & Tuning<br>(SOC Rule Tuning & False Positive Suppression)"]
+    D6 --> D1
+```
+
+1. **Direction & Planning (PIRs):** Menentukan prioritas intelijen, misalnya: *"Siapa aktor yang menargetkan port honeypot, apa alat scannernya, dan di mana IP LAN fisik aslinya?"*
+2. **Collection:** Pengumpulan telemetri dari 5 sensor:
+   - `synwatcher` (L4 Npcap sniffer)
+   - `scpd` (L7 SFTP knock & file decoy)
+   - `ClassRoot` (L7 WebRTC media decoy)
+   - `lemes` (L7 Honeybeacon & canary token)
+3. **Processing:** Normalisasi ke format JSONL standar SOC, deduplikasi rDNS berbasis `sync.Map`, kalkulasi hash MD5/SHA256, dan ekstraksi metadata berkas secara asinkron (<1ms).
+4. **Analysis & Production:** In-memory correlation oleh `cachedb` (:50051) dan penalaran mendalam oleh 5 agen otonom **CrewAI** (`agentic_cti`) untuk membedakan botnet vs targeted APT.
+5. **Dissemination:** Distribusi intelijen secara terarah sesuai kebutuhan:
+   - **Taktis:** `firewall_blocklist.txt` untuk firewall tepi.
+   - **Operasional:** `stix_incident_bundle.json` untuk SIEM/MISP/OpenCTI.
+   - **Strategis:** `latest_cti_incident_report.md` untuk CISO dan manajemen.
+6. **Feedback & Tuning:** Evaluasi efektivitas isolasi dan akurasi skor ancaman untuk penyesuaian sensor.
+
+---
+
+### C. Tiga Tingkatan Cyber Threat Intelligence
+Ekosistem `actif` menghasilkan produk intelijen yang disesuaikan secara presisi untuk 3 lapisan audiens organisasi:
+
+| Tingkatan CTI | Audiens Target | Masa Berlaku | Fokus & Peran Intelijen | Artefak Output Actif |
+|---|---|---|---|---|
+| **Tactical CTI** | Firewall, IDS/IPS, SOC L1 Tier | Jam s/d Hari | Indikator atomik teknis (IOC): IP penyerang, Port probe, Hash SHA-256, MD5 SYN Fingerprint. Digunakan untuk pemblokiran perimeter instan. | `firewall_blocklist.txt`, `-actor <IP>` |
+| **Operational CTI** | SOC L2/L3, Tim DFIR, Threat Hunter | Minggu s/d Bulan | Taktik, Teknik, dan Prosedur (TTPs), profil tool scanning (Nmap/Masscan), alur Cyber Kill Chain, artefak OPSEC laptop penyerang (PDB, EXIF, WebRTC LAN). | `stix_incident_bundle.json`, `threat_stix21.json` |
+| **Strategic CTI** | CISO, CIO, Dewan Direksi, Risk Manager | Bulan s/d Tahun | Gambaran ancaman tingkat tinggi, motivasi serangan (spionase vs finansial), estimasi dampak bisnis, dan tren postur pertahanan. | `latest_cti_incident_report.md` |
+
+---
+
+### D. Pyramid of Pain (David Bianco)
+Mayoritas solusi honeypot tradisional hanya bekerja pada tingkat terendah (Hash & IP). Arsitektur `actif` dirancang untuk memukul penyerang hingga lapisan puncak **Pyramid of Pain**:
+
+```
+                  /\
+                 /  \   TTPs (MITRE ATT&CK Matrix)
+                /----\  -> Dideteksi & dipetakan otomatis oleh CrewAI
+               /      \
+              /        \  Tools (Tool Signature & Footprint)
+             /----------\ -> synwatcher (Nmap TCP SYN Hash), scpd (SFTP client)
+            /            \
+           /              \ Network / Host Artifacts
+          /----------------\ -> ClassRoot (WebRTC ICE LAN leak), scpd (PDB path, EXIF)
+         /                  \
+        /                    \ Domain Names & Canary URLs
+       /----------------------\ -> lemes (Tracking pixel, bait documents)
+      /                        \
+     /                          \ IP Addresses
+    /----------------------------\ -> cachedb, synwatcher, firewall_blocklist
+   /                              \
+  /                                \ Hash Values (SHA-256, MD5)
+ /----------------------------------\ -> scpd Forensic Engine
+```
+
+* **Dampak bagi Penyerang:** Ketika defender mendeteksi IP/Hash (*Trivial/Easy*), penyerang cukup berganti proxy. Namun ketika `actif` mendeteksi **Host Artifacts** (membongkar IP lokal fisik di balik VPN dan username laptop) serta **TTPs**, penyerang terpaksa mengubah seluruh metodologi serangannya (*Tough!*).
+
+---
+
+### E. The Diamond Model of Intrusion Analysis
+Setiap event serangan yang ditangkap oleh `actif` dikorelasikan ke dalam 4 simpul *The Diamond Model*:
+
+```
+                           [ ADVERSARY (Pelaku) ]
+                     - Profil Aktor di CacheDB
+                     - Username author Office OpenXML / PDB
+                     - Real LAN IP via WebRTC ICE Leak
+                                    /\
+                                   /  \
+     [ CAPABILITY (Kemampuan) ]  <      >  [ INFRASTRUCTURE (Infrastruktur) ]
+     - Nmap Stealth SYN scan              - IP Publik Penyerang
+     - SFTP tool transfer (T1105)         - Proxy / VPN Endpoint
+     - Lure credential probe              - STUN/TURN ICE Network
+                                   \  /
+                                    \/
+                             [ VICTIM (Korban) ]
+                     - Honeypot SFTP (:60606)
+                     - Decoy Meeting Room (:8443)
+                     - Honeybeacon Web Portal (:50505)
+```
+
+---
+
+### F. Standar Diseminasi & Traffic Light Protocol (TLP 2.0)
+Seluruh laporan intelijen dan paket STIX 2.1 yang dihasilkan oleh `actif` mematuhi pedoman **FIRST Standards TLP 2.0**:
+- **TLP:RED:** Berisi data identitas fisik penyerang yang sangat sensitif (misal: kebocoran nama asli, GPS lokasi fisik, atau private IP investigasi). Distribusi terbatas hanya pada Tim Inti Incident Response.
+- **TLP:AMBER+STRICT:** Laporan insiden internal yang hanya boleh dibagikan dalam unit kerja SOC/Keamanan internal organisasi.
+- **TLP:AMBER:** Laporan intelijen yang boleh dibagikan ke divisi terkait (IT Infrastructure & Network Ops) untuk penguatan sistem.
+- **TLP:GREEN:** Daftar indikator IOC dan signature yang boleh dibagikan ke komunitas CTI, ISAC sektoral, atau CSIRT mitra.
+- **TLP:CLEAR:** Daftar IP scanner massal publik yang tidak memiliki batasan kerahasiaan.
+
+---
+
+## 3. Peran & Spesifikasi 5 Aplikasi
 
 | No | Aplikasi | Layer / Port | Fungsi Utama & Peran CTI |
 |---|---|---|---|
@@ -55,7 +180,7 @@ Ecosystem ini mengimplementasikan siklus **Cyber Threat Intelligence (CTI) & Dec
 
 ---
 
-## 3. Urutan Menjalankan (Startup Runbook)
+## 4. Urutan Menjalankan (Startup Runbook)
 
 > [!IMPORTANT]
 > Urutan eksekusi sangat penting: **`cachedb` harus selalu dijalankan pertama kali** agar sensor L4 dan L7 lainnya dapat langsung terhubung ke gRPC endpoint `:50051`.
@@ -118,7 +243,7 @@ go run .
 
 ---
 
-## 4. End-to-End Attack Scenario & Correlation Walkthrough
+## 5. End-to-End Attack Scenario & Correlation Walkthrough
 
 Berikut adalah tahapan simulasi dari awal penyerang melakukan profiling hingga identitas aslinya terungkap secara utuh:
 
@@ -136,23 +261,23 @@ Berikut adalah tahapan simulasi dari awal penyerang melakukan profiling hingga i
 
 ---
 
-### Fase 2: Initial Access & Trap Verification (SCP Honeypot)
+### Fase 2: Initial Access & Trap Verification (SCPD Honeypot)
 1. Penyerang melihat port open `60606` dan mencoba menghubunginya via SSH/SFTP:
    ```bash
    sftp -P 60606 192.168.1.55@192.168.1.100
    ```
-2. **`scp`** memeriksa kredensial ke **`cachedb`**:
+2. **`scpd`** memeriksa kredensial ke **`cachedb`**:
    - Username penyerang (`192.168.1.55`) dicocokkan dengan IP asal.
    - Password yang dimasukkan (`8080`) dicocokkan dengan nilai yang disimpan oleh `synwatcher`.
 3. Jika cocok, penyerang berhasil masuk ke lingkungan sandbox virtual.
 4. Ketika penyerang mengunggah file (exploit, script, atau webshell):
-   - `scp` mengaudit aksi `UPLOAD` dengan teknik **MITRE T1105 (Ingress Tool Transfer)**.
+   - `scpd` mengaudit aksi `UPLOAD` dengan teknik **MITRE T1105 (Ingress Tool Transfer)**.
    - Ukuran file, jalur target, IP, client SSH version dicatat ke `scp_cti.jsonl`.
 
 ---
 
 ### Fase 3: Deception & Lateral Movement Bait (Lemes Lure)
-1. Di dalam direktori sandbox `scp`, penyerang menemukan file dokumen jebakan (lure) yang dibuat via **`lemes`** (misal: `backup_credentials_internal.docx` atau link ke `internal-portal.company.local`).
+1. Di dalam direktori sandbox `scpd`, penyerang menemukan file dokumen jebakan (lure) yang dibuat via **`lemes`** (misal: `backup_credentials_internal.docx` atau link ke `internal-portal.company.local`).
 2. Penyerang membuka tautan tersebut atau mengunduh dokumen yang memiliki *embedded tracking pixel*.
 3. Request masuk ke **`lemes`** (`:50505`):
    - Fingerprinting client mengekstrak User-Agent, Bahasa OS, Resolusi Layar, GPU WebGL Renderer (misal: `NVIDIA GeForce RTX 4070 Laptop GPU`).
@@ -180,27 +305,27 @@ Berikut adalah tahapan simulasi dari awal penyerang melakukan profiling hingga i
 
 ---
 
-## 5. Pemetaan MITRE ATT&CK Matrix
+## 6. Pemetaan MITRE ATT&CK Matrix
 
 | Tactic | Technique ID | Technique Name | Sensor Pelapor | Bukti Forensik |
 |---|---|---|---|---|
 | **Reconnaissance** | `T1595` | Active Scanning | `synwatcher` | Pola probe IP dan sequence SYN |
 | **Discovery** | `T1046` | Network Service Scanning | `synwatcher` | Target port & timestamp probe |
-| **Initial Access** | `T1110.001` | Password Guessing / Brute Force | `scp` | Percobaan login gagal di port 60606 |
-| **Initial Access** | `T1078` | Valid Accounts (Trapped) | `scp` / `lemes` | Login sukses dengan port-derived password |
-| **Command & Control** | `T1105` | Ingress Tool Transfer | `scp` | File upload via SFTP handler |
-| **Discovery** | `T1083` | File and Directory Discovery | `scp` | SFTP `ls`, `stat`, `readlink` |
-| **Collection** | `T1005` | Data from Local System | `scp` | SFTP download file |
+| **Initial Access** | `T1110.001` | Password Guessing / Brute Force | `scpd` | Percobaan login gagal di port 60606 |
+| **Initial Access** | `T1078` | Valid Accounts (Trapped) | `scpd` / `lemes` | Login sukses dengan port-derived password |
+| **Command & Control** | `T1105` | Ingress Tool Transfer | `scpd` | File upload via SFTP handler |
+| **Discovery** | `T1083` | File and Directory Discovery | `scpd` | SFTP `ls`, `stat`, `readlink` |
+| **Collection** | `T1005` | Data from Local System | `scpd` | SFTP download file |
 | **Execution** | `T1204` | User Execution | `lemes` | Trigger tracking pixel / canary token |
-| **Defense Evasion** | `T1036` | Masquerading | `scp` | Rename / upload dengan ekstensi ganda |
+| **Defense Evasion** | `T1036` | Masquerading | `scpd` | Rename / upload dengan ekstensi ganda |
 | **Reconnaissance** | `T1016` | System Network Configuration Discovery | `ClassRoot` | WebRTC Host candidate (Private LAN IP) |
 
 ---
 
-## 6. Analisis & Usulan: Integrasi Metadata Parser di `scp`
+## 7. Analisis & Usulan: Integrasi Metadata Parser di `scpd`
 
 ### Pertanyaan Evaluasi:
-> *"Kalo misal di `scp` kita pasang meta parser gimana? Jadi misal yang masuk upload file apakah itu docx, pdf atau file gambar, kita bisa ambil meta datanya untuk bisa melakukan identifikasi juga, gimana menurutmu?"*
+> *"Kalo misal di `scpd` kita pasang meta parser gimana? Jadi misal yang masuk upload file apakah itu docx, pdf atau file gambar, kita bisa ambil meta datanya untuk bisa melakukan identifikasi juga, gimana menurutmu?"*
 
 ### Jawaban Pakar CTI:
 **Sangat direkomendasikan dan bernilai intelijen sangat tinggi (High-Value CTI Capability).**
@@ -316,16 +441,16 @@ Pemasangan parser tidak boleh memperlambat respons SFTP ke penyerang (harus **Ze
 
 ---
 
-## 7. Status Ekosistem & Peningkatan Konkurensi
+## 8. Status Ekosistem & Peningkatan Konkurensi
 
-1. Seluruh 5 komponen (`cachedb`, `synwatcher`, `scp`, `lemes`, `ClassRoot`) kini telah terintegrasi penuh dalam satu siklus CTI multi-layer (L4–L7).
-2. **Metadata Forensics Parser & Goroutine Worker Pool** pada `scp` telah aktif: mem-parsing dokumen DOCX, PDF, EXIF gambar (koordinat GPS), dan PDB binary secara instan (< 1ms SFTP response time) tanpa resiko crash (panic-safe).
+1. Seluruh 5 komponen (`cachedb`, `synwatcher`, `scpd`, `lemes`, `ClassRoot`) kini telah terintegrasi penuh dalam satu siklus CTI multi-layer (L4–L7).
+2. **Metadata Forensics Parser & Goroutine Worker Pool** pada `scpd` telah aktif: mem-parsing dokumen DOCX, PDF, EXIF gambar (koordinat GPS), dan PDB binary secara instan (< 1ms SFTP response time) tanpa resiko crash (panic-safe).
 3. **`ClassRoot` Client Telemetry, Peripheral & Credential Harvesting** telah aktif: sensor `cti-telemetry.js` memanen Username & Password saat login, mengungkap kartu grafis (GPU) asli penyerang via WebGL, mengekstrak model hardware fisik kamera/webcam & microphone (`T1125`/`T1123`), mendeteksi koneksi jaringan fisik (WiFi vs Ethernet & RTT) via Network API, memeriksa modul Bluetooth, dan mengekspos IP LAN private di balik VPN lewat WebRTC ICE leak (`T1016`).
 4. **`lemes` Multi-Format Lure Engine & Dual-Beacon** telah aktif: menyediakan generator dokumen umpan Word (.docx), Excel (.xlsx), PDF (.pdf), dan Windows shortcut (.url) dengan pemuatan konten terpusat dari `content/CONTENT.md` serta Dual-Beacon (Cloudflare Domain + IP LAN).
 
 ---
 
-## 8. Panduan Teknis Pembuatan Dokumen Jebakan (Bait & Canary Documents)
+## 9. Panduan Teknis Pembuatan Dokumen Jebakan (Bait & Canary Documents)
 
 Untuk memancing penyerang agar membuka file di mesin lokalnya sendiri (workstation asli), kita memanfaatkan dokumen jebakan yang disisipi **External Relationship Target** pada format Microsoft Office OpenXML (**`.docx`** & **`.xlsx`**), **Adobe PDF (`.pdf`)**, serta **Windows Internet Shortcut (`.url`)**.
 
@@ -447,7 +572,7 @@ Untuk menyederhanakan operasional di lapangan:
 
 ---
 
-## 9. Arsitektur Advanced Cyber Threat Intelligence (SOC-Grade) & Multi-Goroutine Pipeline
+## 10. Arsitektur Advanced Cyber Threat Intelligence (SOC-Grade) & Multi-Goroutine Pipeline
 
 Sistem `n0z0` mengimplementasikan arsitektur CTI berstandar **Tier-1 SOC / Enterprise Threat Intelligence Platform (TIP)** yang memanfaatkan keunggulan **Go Routine & Channel-Based Asynchronous Pipeline** untuk menjamin respons honeypot sub-milidetik (0ms blocking latency) serta data intelijen yang 100% lengkap dan siap dikonsumsi SIEM / SOAR.
 
@@ -455,9 +580,9 @@ Sistem `n0z0` mengimplementasikan arsitektur CTI berstandar **Tier-1 SOC / Enter
 
 | Dimensi | Parameter Intelijen | Sumber Sensor & Layer |
 |---|---|---|
-| **WHO** | Attacker IP, Reverse DNS (PTR Hostname), Client Version/User-Agent, Fingerprints (TCP SYN Hash MD5, WebGL GPU Renderer, Canvas & Audio Hash), Harvested Credentials (Username/Password/JWT), Uploaded Document Author/Software. | `synwatcher` (L4), `scp` (L7), `ClassRoot` (L7), `cachedb` (Actor Registry) |
+| **WHO** | Attacker IP, Reverse DNS (PTR Hostname), Client Version/User-Agent, Fingerprints (TCP SYN Hash MD5, WebGL GPU Renderer, Canvas & Audio Hash), Harvested Credentials (Username/Password/JWT), Uploaded Document Author/Software. | `synwatcher` (L4), `scpd` (L7), `ClassRoot` (L7), `cachedb` (Actor Registry) |
 | **WHEN** | Timestamp presisi tinggi sub-milidetik (ISO 8601 UTC `RFC3339Nano`), Scan Velocity (`BURST`, `STEADY`, `SLOW_AND_LOW_STEALTH`), First Seen & Last Seen. | Seluruh sensor |
-| **WHERE** | Sensor Hostname ID, Internal/Private vs Public IP Classification, WebRTC ICE Candidate (Local LAN IP Leak menembus VPN), Target Port/Service (SSH, SFTP, HTTP, WebRTC), Endpoint URI yang di-probe. | `ClassRoot`, `synwatcher`, `scp` |
+| **WHERE** | Sensor Hostname ID, Internal/Private vs Public IP Classification, WebRTC ICE Candidate (Local LAN IP Leak menembus VPN), Target Port/Service (SSH, SFTP, HTTP, WebRTC), Endpoint URI yang di-probe. | `ClassRoot`, `synwatcher`, `scpd` |
 | **WHAT** | Event Type, Status (`success`, `failed`, `captured`, `rejected_404`), Attack Pattern (`SQL_INJECTION`, `PATH_TRAVERSAL`, `COMMAND_INJECTION_OR_WEBSHELL`, `CROSS_SITE_SCRIPTING`, `SENSITIVE_FILE_SCANNING`, `BRUTEFORCE`), File Hash (SHA-256/MD5). | `ClassRoot`, `scp`, `synwatcher` |
 | **WHY** | Dynamic Intent Category (`PORT_SWEEP_RECON`, `LATERAL_MOVEMENT_PROBE`, `INITIAL_ACCESS_EXPLOITATION`, `DATA_EXFILTRATION`), Risk Score Komposit (0-100), Severity Level (`INFORMATIONAL`, `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`). | Korelasi silang L4 -> L7 di `cachedb` |
 | **HOW** | Pemetaan resmi taktik dan teknik **MITRE ATT&CK Enterprise Framework** (e.g. `T1595.001`, `T1595.002`, `T1190`, `T1110.001`, `T1078`, `T1016`, `T1083`, `T1059`, `T1056.001`, `T1125`). | Otomatis di-inject ke setiap log JSONL |
@@ -516,7 +641,7 @@ Get-Content -Wait -Tail 20 .\synwatcher\synwatcher_cti.jsonl
 
 ---
 
-## 10. Distribusi Letak Lokasi Log & Topologi Penyimpanan (Log Distribution Architecture)
+## 11. Distribusi Letak Lokasi Log & Topologi Penyimpanan (Log Distribution Architecture)
 
 Ekosistem `n0z0` menghasilkan telemetri terstruktur dalam format **JSON Lines (`.jsonl`)** di masing-masing sub-komponen, serta penyimpanan state memori di `cachedb`. Setiap file dirancang agar dapat di-ingest secara independen maupun dikorelasikan secara terpusat oleh platform SIEM (Elasticsearch, OpenSearch, Wazuh, Splunk, Graylog, atau Microsoft Sentinel).
 
@@ -525,7 +650,7 @@ Ekosistem `n0z0` menghasilkan telemetri terstruktur dalam format **JSON Lines (`
 | Komponen | Berkas Log Default | Parameter / Flag CLI | Layer & Protokol | Jenis Telemetri & Data Intelijen |
 |---|---|---|---|---|
 | **`synwatcher`** | `synwatcher/synwatcher_cti.jsonl` | `-logfile <path>` atau `-cti <path>` | L4 Network (Npcap) | Reconnaissance IP, SYN Fingerprint MD5, scan velocity (`BURST`, `STEADY`), rDNS, passive OS estimation, port-sweep detection. |
-| **`scp`** | `scp/scp_cti.jsonl` | Konfigurasi `CTI_LOG` / Flag `-cti <path>` | L7 SFTP / SSH (:60606) | Brute-force credentials, dynamic knock validation, file auditing (upload/download/rm), file forensics (SHA-256, EXIF GPS, docx/pdf author, PDB). |
+| **`scpd`** | `scpd/scp_cti.jsonl` | Konfigurasi `CTI_LOG` / Flag `-cti <path>` | L7 SFTP / SSH (:60606) | Brute-force credentials, dynamic knock validation, file auditing (upload/download/rm), file forensics (SHA-256, EXIF GPS, docx/pdf author, PDB). |
 | **`ClassRoot`** | `ClassRoot/classroot_cti.jsonl` | `-ctilog <path>` | L7 Web & WebRTC (:8443) | WebRTC ICE candidate leak (Private LAN IP unmasking VPN), GPU renderer, canvas/audio hash, harvested credentials, camera/mic detection, attack patterns (SQLi/XSS/RCE). |
 | **`lemes`** | `lemes/lemes_cti.jsonl` | `-ctilog <path>` | L7 HTTP (:50505) | Canary token trigger, de-anonymization attribution (VPN vs Local Workstation IP), browser hardware fingerprinting, audit pengiriman webhook (Discord/Telegram/Slack/SIEM). |
 | **`cachedb`** | `cachedb/cachedb.db` *(snapshot)* | `-snapshot <path>` & `-load <path>` | L7 In-Memory Bus (:50051) | In-memory gRPC threat state, active actor dossiers, port knock derivations, token-to-owner bindings. Disimpan ke disk sesuai kebutuhan snapshot. |
@@ -608,7 +733,7 @@ Dengan topologi sentralisasi ini, agen log forwarder (Filebeat/Vector/Fluentbit)
 
 ---
 
-## 11. Detail Tata Cara & Standard Operating Procedures (SOP) Operasional SOC
+## 12. Detail Tata Cara & Standard Operating Procedures (SOP) Operasional SOC
 
 Bagian ini menyajikan panduan operasional standar (*Standard Operating Procedures*) bagi Security Analyst, Incident Responder, dan Honeypot Administrator.
 
@@ -815,7 +940,7 @@ Operator dapat memperbarui atau menaruh file umpan baru ke dalam direktori sandb
 
 ---
 
-## 12. Panduan Integrasi Log Shipper & SIEM Ingestion
+## 13. Panduan Integrasi Log Shipper & SIEM Ingestion
 
 Untuk menghubungkan seluruh log JSONL ekosistem `n0z0` ke platform SIEM enterprise, berikut adalah contoh konfigurasi shipper yang siap digunakan:
 
