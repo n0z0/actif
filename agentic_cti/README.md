@@ -3,7 +3,7 @@
 
 Modul ini mengimplementasikan sistem multi-agent **CrewAI** yang mengorkestrasi, mengkorelasikan, dan menganalisis seluruh data telemetri yang dihasilkan oleh kelima sensor deception `n0z0`:
 - **`synwatcher`**: L4 SYN Reconnaissance, TCP SYN Fingerprint MD5, Passive OS.
-- **`scp`**: L7 SFTP Authentication, Dynamic Knock Verification, File Forensics (EXIF, OpenXML, PDB).
+- **`scpd`**: L7 SFTP Authentication, Dynamic Knock Verification, File Forensics (EXIF, OpenXML, PDB).
 - **`ClassRoot`**: L7 WebRTC ICE Candidate (LAN IP Leak), GPU Renderer, Credential Harvesting.
 - **`lemes`**: L7 Canary Token Activation, De-anonymization Attribution, SOAR Webhooks.
 - **`cachedb`**: L7 In-Memory Threat State Bus & 360-Degree Actor Dossier.

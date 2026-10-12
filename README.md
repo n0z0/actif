@@ -30,7 +30,7 @@
                 | Get(IP) -> expected port                          |
                 v                                                   v
          +--------------+                                    +--------------+
-         |     scp      | (L7 SSH/SFTP Decoy)                |    lemes     | (L7 Honeybeacon)
+         |     scpd     | (L7 SSH/SFTP Decoy)                |    lemes     | (L7 Honeybeacon)
          | :60606 SFTP  |                                    | :50505 HTTP  |
          +--------------+                                    +--------------+
          - Dynamic Trap Auth                                 - Canary Token & Lures
