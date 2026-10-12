@@ -37,7 +37,7 @@ def demo_mode():
     target_ip = "198.51.100.25"
     print("🧪 [DEMO MODE] Menjalankan simulasi skenario serangan end-to-end:")
     print("   1. L4 SYN Port Scan (synwatcher)")
-    print("   2. L7 SFTP Authentication & File Upload (scp)")
+    print("   2. L7 SFTP Authentication & File Upload (scpd)")
     print("   3. L7 WebRTC LAN IP Leak (ClassRoot)")
     print("   4. L7 Canary Document Beacon & Token Attribution (lemes)")
     run_investigation(target_ip)
