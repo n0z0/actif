@@ -15,7 +15,7 @@ Gunakan skill ini untuk mengoperasikan, mengorkestrasikan, dan melakukan trouble
 |---|---|---|
 | `cachedb/` | Go / gRPC (`:50051`) | In-memory Threat State Bus, correlation engine (TTL 10 jam), CLI inspection (`-actor`, `-actors`, `-ping`, `-blocklist`, `-export-stix`). |
 | `synwatcher/` | Go / Npcap | L4 SYN sniffer, passive OS estimation, TCP SYN fingerprint hash MD5, scan velocity calculation, thread-safe rDNS cache. |
-| `scp/` | Go / SSH (`:60606`) | Dynamic knock auth honeypot, forensic file worker pool (DOCX, PDF, EXIF GPS, PDB), pendaftaran unduhan lure ke `cachedb`. |
+| `scpd/` | Go / SSH (`:60606`) | Dynamic knock auth honeypot, forensic file worker pool (DOCX, PDF, EXIF GPS, PDB), pendaftaran unduhan lure ke `cachedb`. |
 | `ClassRoot/` | Go / WebRTC (`:8443`) | WebRTC ICE candidate local IP leak (unmasking VPN/Tor), WebGL GPU renderer, camera/mic detection, harvested credentials capture. |
 | `lemes/` | Go / HTTP (`:50505`) | Attribution de-anonymization sink, generator dokumen umpan (Word `.docx`, Excel `.xlsx` via `CONTENT.csv`, PDF `.pdf`), asynchronous SOAR/Webhook dispatcher. |
 | `agentic_cti/` | Python / CrewAI | Modul orkestrasi 5 Agen AI otonom untuk analisis dan korelasi data telemetri seluruh sensor. |
@@ -55,7 +55,7 @@ cd .\synwatcher
 go run . -cti synwatcher_cti.jsonl
 
 # Terminal 3: Dynamic SFTP Honeypot & Forensik
-cd .\scp
+cd .\scpd
 go run .
 
 # Terminal 4: Honeybeacon & Alerting Webhook

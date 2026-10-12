@@ -224,6 +224,7 @@ cachedb/
 ClassRoot/
 lemes/
 scp/
+scpd/
 synwatcher/
 
 # Ecosystem log, database, and telemetry outputs

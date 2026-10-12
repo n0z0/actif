@@ -15,7 +15,7 @@ Repositori ini mengorkestrasi 5 sub-proyek independen dan 1 modul AI Orchestrato
 2. **`synwatcher/`** (`git@github.com:n0z0/synwatcher.git`):
    - Sensor L4 Npcap sniffer untuk mendeteksi SYN scan secara non-blocking.
    - Menghitung TCP SYN Fingerprint MD5, scan velocity, rDNS deduplication cache.
-3. **`scp/`** (`git@github.com:n0z0/scp.git`):
+3. **`scpd/`** (`git@github.com:n0z0/scpd.git`):
    - Interactive SSH/SFTP honeypot (`:60606`) dengan knock auth berbasis data `synwatcher`.
    - File forensics worker pool (SHA-256, docx/pdf author, EXIF GPS, PDB).
 4. **`ClassRoot/`** (`git@github.com:n0z0/ClassRoot.git`):
@@ -26,7 +26,7 @@ Repositori ini mengorkestrasi 5 sub-proyek independen dan 1 modul AI Orchestrato
    - Modul orkestrasi Python **CrewAI** yang mengerahkan 5 agen otonom untuk menganalisis dan mengkorelasikan seluruh data sensor secara otomatis.
 
 > [!IMPORTANT]
-> Kelima folder aplikasi di atas (`cachedb`, `synwatcher`, `scp`, `ClassRoot`, `lemes`) adalah repositori git mandiri dan **di-ignore** oleh `.gitignore` pada root `actif`. Jangan menghapus atau mengubah konfigurasi `.gitignore` untuk kelima folder ini.
+> Kelima folder aplikasi di atas (`cachedb`, `synwatcher`, `scpd`, `ClassRoot`, `lemes`) adalah repositori git mandiri dan **di-ignore** oleh `.gitignore` pada root `actif`. Jangan menghapus atau mengubah konfigurasi `.gitignore` untuk kelima folder ini.
 
 ---
 
@@ -43,7 +43,7 @@ Eksekusi portabel (setelah menjalankan `.\install-all.ps1`):
 ```powershell
 1. cachedb -port 50051 -ttl 36000           (:50051 gRPC)   <-- WAJIB PERTAMA
 2. synwatcher -logfile synwatcher_cti.jsonl (L4 Sniff Npcap)
-3. scp                                      (:60606 SFTP)
+3. scpd                                     (:60606 SFTP)
 4. lemes -port :50505 -ctilog lemes_cti.jsonl (:50505 HTTP)
 5. classroot                                (:8443 WebRTC)
 ```

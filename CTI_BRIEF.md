@@ -1,6 +1,6 @@
 # Cyber Threat Intelligence (CTI) Operational Runbook & Ecosystem Brief
 **Repository / Workspace:** `n0z0`  
-**Ecosystem Components:** `cachedb`, `synwatcher`, `scp`, `lemes`, `ClassRoot`  
+**Ecosystem Components:** `cachedb`, `synwatcher`, `scpd`, `lemes`, `ClassRoot`  
 **Date:** Oktober 2026  
 **Document Version:** 1.0.0
 
@@ -33,7 +33,7 @@ Ecosystem ini mengimplementasikan siklus **Cyber Threat Intelligence (CTI) & Dec
                 | Get(IP) -> expected port                          |
                 v                                                   v
          +--------------+                                    +--------------+
-         |     scp      | (L7 SSH/SFTP Decoy)                |    lemes     | (L7 Honeybeacon)
+         |     scpd     | (L7 SSH/SFTP Decoy)                |    lemes     | (L7 Honeybeacon)
          | :60606 SFTP  |                                    | :50505 HTTP  |
          +--------------+                                    +--------------+
          - Dynamic Trap Auth                                 - Canary Token & Lures
@@ -49,7 +49,7 @@ Ecosystem ini mengimplementasikan siklus **Cyber Threat Intelligence (CTI) & Dec
 |---|---|---|---|
 | 1 | **`cachedb`** | L7 gRPC `:50051` | **Threat Cache & Correlation Engine**. Menyimpan relasi IP penyerang, target port hasil sniffing, metadata sesi, dan token canary. Default TTL: **10 Jam (36.000 detik)**. |
 | 2 | **`synwatcher`** | L4 Npcap Sniffer | **Early Warning L4 Sensor**. Mendeteksi probe reconnaissance (SYN scan), memfilter traffic, lalu mendaftarkan `attacker_ip -> probed_port` ke `cachedb` secara real-time. |
-| 3 | **`scp`** | L7 SSH/SFTP `:60606` | **Interactive Honeypot & File Audit**. Menggunakan dynamic authentication berbasis `cachedb` (hanya IP yang pernah scan yang punya password valid). Merekam audit transfer file (upload/download/rm) dengan pemetaan MITRE ATT&CK. |
+| 3 | **`scpd`** | L7 SSH/SFTP `:60606` | **Interactive Honeypot & File Audit**. Menggunakan dynamic authentication berbasis `cachedb` (hanya IP yang pernah scan yang punya password valid). Merekam audit transfer file (upload/download/rm) dengan pemetaan MITRE ATT&CK. |
 | 4 | **`lemes`** | L7 HTTP `:50505` | **Honeybeacon & Canary Decoy**. Menyediakan tracking pixel, lure bait document, decoy admin portal, dan fingerprinting browser mendalam (Canvas, WebGL, GPU Renderer, AudioContext). |
 | 5 | **`ClassRoot`** | L7 WebRTC `:8443` | **WebRTC Decoy, Client Telemetry & LAN De-anonymizer**. Ruang meeting palsu dengan auto HTTPS (self-signed). Dilengkapi sensor JS client (`cti-telemetry.js`) untuk memanen kredensial (Username & Password), User-Agent, GPU Renderer, dan menembus VPN via WebRTC ICE candidate (`typ host`). |
 
@@ -83,10 +83,10 @@ go run . -cti syn_cti.jsonl
 
 ---
 
-### Terminal 3: Inisialisasi scp (L7 SFTP Honeypot)
+### Terminal 3: Inisialisasi scpd (L7 SFTP Honeypot)
 Jalankan server SSH/SFTP perangkap:
 ```powershell
-cd c:\Users\Windows 11 Pro\Documents\joe\n0z0\scp
+cd c:\Users\Windows 11 Pro\Documents\joe\n0z0\scpd
 go run .
 ```
 *Status: Berjalan pada port `0.0.0.0:60606`. Menghubungkan ke `cachedb` di `:50051` dan siap mengaudit sesi ke `scp_cti.jsonl`.*

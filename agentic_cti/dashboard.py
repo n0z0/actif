@@ -107,7 +107,7 @@ class DashboardHandler(SimpleHTTPRequestHandler):
     def serve_status(self):
         root_dir = Path("..")
         syn_log = (root_dir / "synwatcher" / "synwatcher_cti.jsonl").is_file()
-        scp_log = (root_dir / "scp" / "scp_cti.jsonl").is_file()
+        scp_log = (root_dir / "scpd" / "scp_cti.jsonl").is_file() or (root_dir / "scp" / "scp_cti.jsonl").is_file()
         cr_log = (root_dir / "ClassRoot" / "classroot_cti.jsonl").is_file()
         lemes_log = (root_dir / "lemes" / "lemes_cti.jsonl").is_file()
 

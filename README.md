@@ -48,7 +48,7 @@ Setiap komponen aplikasi dikelola secara modular pada repositorinya masing-masin
 |---|---|---|---|
 | **`cachedb`** | [`n0z0/cachedb`](https://github.com/n0z0/cachedb) | L7 gRPC `:50051` | In-memory Threat State Bus, correlation engine (TTL 10 jam), CLI inspection (`-actor`, `-actors`, `-ping`, `-blocklist`, `-export-stix`). |
 | **`synwatcher`** | [`n0z0/synwatcher`](https://github.com/n0z0/synwatcher) | L4 Npcap Sniffer | Passive OS estimation, TCP SYN fingerprint hash MD5, scan velocity calculation, thread-safe rDNS cache. |
-| **`scp`** | [`n0z0/scp`](https://github.com/n0z0/scp) | L7 SFTP/SSH `:60606` | Dynamic knock authentication, panic-proof forensic file worker pool (DOCX, PDF, EXIF GPS, PDB), pendaftaran unduhan lure ke `cachedb`. |
+| **`scpd`** | [`n0z0/scpd`](https://github.com/n0z0/scpd) | L7 SFTP/SSH `:60606` | Dynamic knock authentication, panic-proof forensic file worker pool (DOCX, PDF, EXIF GPS, PDB), pendaftaran unduhan lure ke `cachedb`. |
 | **`ClassRoot`** | [`n0z0/ClassRoot`](https://github.com/n0z0/ClassRoot) | L7 WebRTC `:8443` | WebRTC ICE candidate local IP leak (unmasking VPN/Tor), WebGL GPU renderer, camera/mic detection, harvested credentials capture. |
 | **`lemes`** | [`n0z0/lemes`](https://github.com/n0z0/lemes) | L7 HTTP `:50505` | Attribution de-anonymization sink, generator dokumen jebakan (Word `.docx`, Excel `.xlsx` via `CONTENT.csv`, PDF `.pdf`), asynchronous SOAR/Webhook dispatcher (Discord, Telegram, Slack, SIEM). |
 
@@ -59,7 +59,7 @@ Setiap komponen aplikasi dikelola secara modular pada repositorinya masing-masin
 Repositori ini dilengkapi modul **[`agentic_cti/`](./agentic_cti)**, yaitu sistem multi-agent otonom berbasis **CrewAI** yang bertindak sebagai analis SOC virtual untuk mengolah dan mengkorelasikan seluruh data sensor secara otomatis:
 
 1. **`l4_recon_specialist`**: Menganalisis log `synwatcher` (pola scan, SYN fingerprint MD5, OS passive, scan velocity).
-2. **`dfir_file_specialist`**: Menganalisis log `scp` (forensik metadata author docx/pdf, EXIF GPS, SHA-256, build compiler).
+2. **`dfir_file_specialist`**: Menganalisis log `scpd` (forensik metadata author docx/pdf, EXIF GPS, SHA-256, build compiler).
 3. **`attribution_hunter`**: Mengkorelasikan log `ClassRoot` & `lemes` (unmasking VPN via WebRTC LAN IP leak & token mismatch).
 4. **`threat_intel_strategist`**: Memetakan kill chain ke taktik/teknik MITRE ATT&CK dan menghitung Composite Threat Score.
 5. **`soc_incident_commander`**: Menyusun Executive Incident Brief, merilis STIX 2.1 bundle, dan menetapkan blocklist firewall.
@@ -68,7 +68,7 @@ Repositori ini dilengkapi modul **[`agentic_cti/`](./agentic_cti)**, yaitu siste
 flowchart TD
     subgraph SENSORS ["📡 Sensor Layer (n0z0 Deception)"]
         S1["synwatcher (L4 SYN Sniffer)"]
-        S2["scp (L7 SFTP Honeypot)"]
+        S2["scpd (L7 SFTP Honeypot)"]
         S3["ClassRoot (L7 WebRTC Decoy)"]
         S4["lemes (L7 Honeybeacon & Lures)"]
         BUS[("cachedb (:50051 gRPC)")]
@@ -137,7 +137,7 @@ cachedb -port 50051 -ttl 36000
 synwatcher -logfile synwatcher_cti.jsonl
 
 # 3. Terminal 3 - Jalankan Dynamic SFTP Honeypot & Forensik:
-scp
+scpd
 
 # 4. Terminal 4 - Jalankan Honeybeacon & Alerting Webhook:
 lemes -port :50505 -ctilog lemes_cti.jsonl
@@ -148,7 +148,7 @@ classroot
 
 > **💡 Opsi Alternatif Pengembang (Dev Mode tanpa install):**  
 > Jika sedang mengedit kode sumber dan ingin menjalankan langsung tanpa memasang binary:  
-> `cd .\cachedb && go run main.go -port 50051` | `cd .\synwatcher && go run . -cti synwatcher_cti.jsonl` | `cd .\scp && go run .` | `cd .\lemes && go run . -port :50505` | `cd .\ClassRoot && go run .`
+> `cd .\cachedb && go run main.go -port 50051` | `cd .\synwatcher && go run . -cti synwatcher_cti.jsonl` | `cd .\scpd && go run .` | `cd .\lemes && go run . -port :50505` | `cd .\ClassRoot && go run .`
 
 ---
 
@@ -271,7 +271,7 @@ Seluruh spesifikasi arsitektur, skenario penyerangan, pemetaan MITRE ATT&CK, dis
 .\cachedb.exe -export-stix -out threat_stix21.json
 
 # 6. Stream log telemetri CTI secara bersamaan
-Get-Content -Wait -Tail 20 .\lemes\lemes_cti.jsonl, .\ClassRoot\classroot_cti.jsonl, .\scp\scp_cti.jsonl, .\synwatcher\synwatcher_cti.jsonl
+Get-Content -Wait -Tail 20 .\lemes\lemes_cti.jsonl, .\ClassRoot\classroot_cti.jsonl, .\scpd\scp_cti.jsonl, .\synwatcher\synwatcher_cti.jsonl
 ```
 
 ---
@@ -281,7 +281,7 @@ Get-Content -Wait -Tail 20 .\lemes\lemes_cti.jsonl, .\ClassRoot\classroot_cti.js
 Bagian ini dirancang agar setiap **AI Agent / Pair Programmer** di masa mendatang yang membuka repositori ini langsung memiliki konteks penuh tanpa kehilangan riwayat:
 
 1. **Status Komponen Sensor:**
-   - Seluruh 5 aplikasi Go (`cachedb`, `synwatcher`, `scp`, `ClassRoot`, `lemes`) sudah selesai di-hardening, lulus tes integrasi (`go test ./...`), dan di-push ke GitHub repo masing-masing.
+   - Seluruh 5 aplikasi Go (`cachedb`, `synwatcher`, `scpd`, `ClassRoot`, `lemes`) sudah selesai di-hardening, lulus tes integrasi (`go test ./...`), dan di-push ke GitHub repo masing-masing.
    - Kelima folder sub-repo tersebut **di-ignore** di `.gitignore` agar root repositori `actif` tetap bersih.
 2. **Status Modul AI Orchestrator:**
    - Modul `agentic_cti/` (CrewAI) sudah siap digunakan lengkap dengan 5 definisi agen (`agents.yaml`), 5 alur tugas (`tasks.yaml`), serta custom tools integrasi ke binary CacheDB dan log JSONL.

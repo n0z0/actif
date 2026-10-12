@@ -8,7 +8,7 @@ Write-Host " ACTIF Ecosystem - Master Installer (5 Deception Daemons)" -Foregrou
 Write-Host "==========================================================" -ForegroundColor Cyan
 
 $root = $PSScriptRoot
-$apps = @("cachedb", "synwatcher", "scp", "lemes", "ClassRoot")
+$apps = @("cachedb", "synwatcher", "scpd", "lemes", "ClassRoot")
 
 if ($FromSource) {
     Write-Host "[*] Memasang kelima aplikasi dari Source Code lokal (go build)..." -ForegroundColor Yellow
@@ -22,7 +22,7 @@ if ($FromSource) {
         if (Test-Path $appPath) {
             Write-Host "[*] Mengompilasi $app..." -ForegroundColor Cyan
             $outputExe = Join-Path $binDir "$($app.ToLower()).exe"
-            # Khusus scp dan classroot
+            # Khusus scpd dan classroot
             if ($app -eq "ClassRoot") {
                 $outputExe = Join-Path $binDir "classroot.exe"
             }
@@ -74,7 +74,7 @@ Write-Host "==========================================================" -Foregro
 Write-Host "Anda dapat langsung memanggilnya dari terminal/PowerShell mana pun:"
 Write-Host "   1. cachedb -port 50051 -ttl 36000" -ForegroundColor Yellow
 Write-Host "   2. synwatcher -logfile synwatcher_cti.jsonl" -ForegroundColor Yellow
-Write-Host "   3. scp" -ForegroundColor Yellow
+Write-Host "   3. scpd" -ForegroundColor Yellow
 Write-Host "   4. lemes -port :50505 -ctilog lemes_cti.jsonl" -ForegroundColor Yellow
 Write-Host "   5. classroot" -ForegroundColor Yellow
 Write-Host "==========================================================" -ForegroundColor Green

@@ -33,9 +33,13 @@ class LogReaderTool(BaseTool):
         central_dir = os.getenv("N0Z0_LOG_DIR", "C:\\ProgramData\\n0z0\\logs")
 
         # Map lokasi default file log
+        scpd_log = os.path.join(root_dir, "scpd", "scp_cti.jsonl")
+        scp_legacy_log = os.path.join(root_dir, "scp", "scp_cti.jsonl")
+        scp_path = scpd_log if os.path.exists(os.path.join(root_dir, "scpd")) else scp_legacy_log
+
         paths = {
             "synwatcher": os.path.join(root_dir, "synwatcher", "synwatcher_cti.jsonl"),
-            "scp": os.path.join(root_dir, "scp", "scp_cti.jsonl"),
+            "scp": scp_path,
             "classroot": os.path.join(root_dir, "ClassRoot", "classroot_cti.jsonl"),
             "lemes": os.path.join(root_dir, "lemes", "lemes_cti.jsonl"),
         }
