@@ -49,8 +49,8 @@ Setiap komponen aplikasi dikelola secara modular pada repositorinya masing-masin
 | **`cachedb`** | [`n0z0/cachedb`](https://github.com/n0z0/cachedb) | L7 gRPC `:50051` | In-memory Threat State Bus, correlation engine (TTL 10 jam), CLI inspection (`-actor`, `-actors`, `-ping`, `-blocklist`, `-export-stix`). |
 | **`synwatcher`** | [`n0z0/synwatcher`](https://github.com/n0z0/synwatcher) | L4 Npcap Sniffer | Passive OS estimation, TCP SYN fingerprint hash MD5, scan velocity calculation, thread-safe rDNS cache. |
 | **`scpd`** | [`n0z0/scpd`](https://github.com/n0z0/scpd) | L7 SFTP/SSH `:60606` | Dynamic knock authentication, panic-proof forensic file worker pool (DOCX, PDF, EXIF GPS, PDB), pendaftaran unduhan lure ke `cachedb`. |
-| **`ClassRoot`** | [`n0z0/ClassRoot`](https://github.com/n0z0/ClassRoot) | L7 WebRTC `:8443` | WebRTC ICE candidate local IP leak (unmasking VPN/Tor), WebGL GPU renderer, camera/mic detection, harvested credentials capture. |
-| **`lemes`** | [`n0z0/lemes`](https://github.com/n0z0/lemes) | L7 HTTP `:50505` | Attribution de-anonymization sink, generator dokumen jebakan (Word `.docx`, Excel `.xlsx` via `CONTENT.csv`, PDF `.pdf`), asynchronous SOAR/Webhook dispatcher (Discord, Telegram, Slack, SIEM). |
+| **`ClassRoot`** | [`n0z0/ClassRoot`](https://github.com/n0z0/ClassRoot) | L7 WebRTC `:8443` | WebRTC ICE candidate network topology analysis, WebGL GPU rendering telemetry, media peripheral diagnostics, and authentication audit logging. |
+| **`lemes`** | [`n0z0/lemes`](https://github.com/n0z0/lemes) | L7 HTTP `:50505` | Active attribution telemetri sink, generator dokumen audit canary (Word `.docx`, Excel `.xlsx` via `CONTENT.csv`, PDF `.pdf`), asynchronous SOAR/Webhook dispatcher (Discord, Telegram, Slack, SIEM). |
 
 ---
 
@@ -82,7 +82,7 @@ flowchart TD
         direction TB
         A1["🕵️ 1. L4 Recon Specialist<br><i>Analisa pola scan, velocity, OS passive</i>"]
         A2["🔬 2. DFIR File Specialist<br><i>Analisa author docx, GPS EXIF, PDB</i>"]
-        A3["🎭 3. Attribution Hunter<br><i>Bongkar VPN via WebRTC LAN IP leak</i>"]
+        A3["🎭 3. Attribution Hunter<br><i>Analisa topologi jaringan via WebRTC ICE leak</i>"]
         A4["🗺️ 4. Threat Intel Strategist<br><i>Petakan MITRE ATT&CK & Threat Score</i>"]
         A5["🚨 5. SOC Incident Commander<br><i>Keputusan akhir & Action Plan</i>"]
 
