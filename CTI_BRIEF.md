@@ -176,7 +176,7 @@ Seluruh laporan intelijen dan paket STIX 2.1 yang dihasilkan oleh `actif` mematu
 | 2 | **`synwatcher`** | L4 Npcap Sniffer | **Early Warning L4 Sensor**. Mendeteksi probe reconnaissance (SYN scan), memfilter traffic, lalu mendaftarkan `attacker_ip -> probed_port` ke `cachedb` secara real-time. |
 | 3 | **`scpd`** | L7 SSH/SFTP `:60606` | **Interactive Honeypot & File Audit**. Menggunakan dynamic authentication berbasis `cachedb` (hanya IP yang pernah scan yang punya password valid). Merekam audit transfer file (upload/download/rm) dengan pemetaan MITRE ATT&CK. |
 | 4 | **`lemes`** | L7 HTTP `:50505` | **Honeybeacon & Canary Decoy**. Menyediakan tracking pixel, lure bait document, decoy admin portal, dan fingerprinting browser mendalam (Canvas, WebGL, GPU Renderer, AudioContext). |
-| 5 | **`ClassRoot`** | L7 WebRTC `:8443` | **WebRTC Decoy, Client Telemetry & LAN De-anonymizer**. Ruang meeting palsu dengan auto HTTPS (self-signed). Dilengkapi sensor JS client (`cti-telemetry.js`) untuk memanen kredensial (Username & Password), User-Agent, GPU Renderer, dan menembus VPN via WebRTC ICE candidate (`typ host`). |
+| 5 | **`ClassRoot`** | L7 WebRTC `:8443` | **WebRTC Media Node & Client Telemetry Observability**. Layanan media WebRTC dengan auto HTTPS (self-signed). Dilengkapi sensor JS client (`cti-telemetry.js`) untuk audit autentikasi, User-Agent, GPU Renderer, dan analisis interface jaringan via WebRTC ICE candidate (`typ host`). |
 
 ---
 
@@ -445,7 +445,7 @@ Pemasangan parser tidak boleh memperlambat respons SFTP ke penyerang (harus **Ze
 
 1. Seluruh 5 komponen (`cachedb`, `synwatcher`, `scpd`, `lemes`, `ClassRoot`) kini telah terintegrasi penuh dalam satu siklus CTI multi-layer (L4–L7).
 2. **Metadata Forensics Parser & Goroutine Worker Pool** pada `scpd` telah aktif: mem-parsing dokumen DOCX, PDF, EXIF gambar (koordinat GPS), dan PDB binary secara instan (< 1ms SFTP response time) tanpa resiko crash (panic-safe).
-3. **`ClassRoot` Client Telemetry, Peripheral & Credential Harvesting** telah aktif: sensor `cti-telemetry.js` memanen Username & Password saat login, mengungkap kartu grafis (GPU) asli penyerang via WebGL, mengekstrak model hardware fisik kamera/webcam & microphone (`T1125`/`T1123`), mendeteksi koneksi jaringan fisik (WiFi vs Ethernet & RTT) via Network API, memeriksa modul Bluetooth, dan mengekspos IP LAN private di balik VPN lewat WebRTC ICE leak (`T1016`).
+3. **`ClassRoot` Client Telemetry, Peripheral & Authentication Audit** telah aktif: sensor `cti-telemetry.js` mencatat telemetri login, verifikasi GPU via WebGL, diagnostik model hardware kamera/webcam & microphone (`T1125`/`T1123`), deteksi koneksi jaringan fisik (WiFi vs Ethernet & RTT) via Network API, modul Bluetooth, dan pemetaan topologi jaringan privat lewat WebRTC ICE leak (`T1016`).
 4. **`lemes` Multi-Format Lure Engine & Dual-Beacon** telah aktif: menyediakan generator dokumen umpan Word (.docx), Excel (.xlsx), PDF (.pdf), dan Windows shortcut (.url) dengan pemuatan konten terpusat dari `content/CONTENT.md` serta Dual-Beacon (Cloudflare Domain + IP LAN).
 
 ---
