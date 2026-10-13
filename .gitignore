@@ -222,6 +222,7 @@ __marimo__/
 # Sub-application repositories (individually managed)
 cachedb/
 ClassRoot/
+ClassRootAndroid/
 lemes/
 scp/
 scpd/
